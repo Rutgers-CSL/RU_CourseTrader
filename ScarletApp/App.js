@@ -15,16 +15,16 @@ export default function App() {
 
       <View style={styles.iconBar}>
         <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="home" size={36} color="white" />
+          <FontAwesome name="home" size={28} color="333" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="search" size={36} color="white" />
+          <FontAwesome name="search" size={28} color="333" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="bell" size={36} color="white" />
+          <FontAwesome name="bell" size={28} color="333" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="user" size={36} color="white" />
+          <FontAwesome name="user" size={28} color="333" />
         </TouchableOpacity>
       </View>
       <StatusBar style="auto" />
@@ -39,32 +39,49 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 
+  text: {
+    fontSize: 18,
+    fontWeight: '500',
+    text: '#fff'
+  },
+
   iconBar: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#555",
-    paddingVertical: 10,
-    paddingHorizontal: 5,  
+    backgroundColor: "#fff",
+    paddingVertical: 12,
+    paddingHorizontal: 10,  
     position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 10,
+    left: 10,
+    right: 10,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 6,
   },
 
   iconLink: {
     padding: 8,
     alignItems: "center",
+    justifyContent: "center",
   },
+
   iconLinkHover: {
     backgroundColor: "#000",
   },
+
   active: {
     backgroundColor: "#04AA6D",
   },
+
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 60,
-  }
+    marginBottom: 80,
+    backgroundColor: '#e0f7fa'
+  },
 });
