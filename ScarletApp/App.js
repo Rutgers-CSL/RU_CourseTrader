@@ -1,31 +1,34 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { TouchableOpacity } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function App() {
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+
+      <View style={styles.content}>
+        <Text>This is the beginning of the RU_CourseTrader App!</Text>
+      </View>
+
       <View style={styles.iconBar}>
-        <TouchableOpacity style={[styles.iconLink, styles.active]}>
+        <TouchableOpacity style={styles.iconLink}>
           <FontAwesome name="home" size={36} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconLink}>
           <FontAwesome name="search" size={36} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="globe" size={36} color="white" />
+          <FontAwesome name="bell" size={36} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="trash" size={36} color="white" />
+          <FontAwesome name="user" size={36} color="white" />
         </TouchableOpacity>
       </View>
-
-      <Text>This is the beginning of the RU_CourseTrader App!</Text>
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -42,6 +45,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#555",
     paddingVertical: 10,
     paddingHorizontal: 5,  
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 
   iconLink: {
@@ -58,5 +65,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 60,
   }
 });
