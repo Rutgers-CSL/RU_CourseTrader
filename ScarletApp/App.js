@@ -4,31 +4,27 @@ import { TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import HomeScreen from './screens/HomeScreen';
+import SearchScreen from './screens/SearchScreen';
+import NotiScreen from './screens/NotiScreen';
+import ProfileScreen from './screens/ProfileScreen';
+
+const Stack = createStackNavigator();
+
 export default function App() {
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-
-      <View style={styles.content}>
-        <Text>This is the beginning of the RU_CourseTrader App!</Text>
-      </View>
-
-      <View style={styles.iconBar}>
-        <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="home" size={28} color="333" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="search" size={28} color="333" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="bell" size={28} color="333" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconLink}>
-          <FontAwesome name="user" size={28} color="333" />
-        </TouchableOpacity>
-      </View>
-      <StatusBar style="auto" />
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Search" component={SearchScreen} />
+        <Stack.Screen name="Notifications" component={NotiScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -42,7 +38,8 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     fontWeight: '500',
-    text: '#fff'
+    color: 'black',
+    textAlign: 'center',
   },
 
   iconBar: {
@@ -82,6 +79,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 80,
-    backgroundColor: '#e0f7fa'
+    backgroundColor: '#e0f7fa',
   },
 });
