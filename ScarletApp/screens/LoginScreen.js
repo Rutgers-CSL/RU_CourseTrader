@@ -19,7 +19,6 @@ export default function LoginScreen({ navigation }) {
             <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholder="Password"
                 placeholderTextColor="#aaa"
                 secureTextEntry
             />
