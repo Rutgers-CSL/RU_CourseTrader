@@ -1,9 +1,21 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, {useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { supabase } from '../lib/supabaseClient';
 
 export default function LoginScreen({ navigation }) {
-    const handleLogin = () => {
-        navigation.replace('Home');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleLogin = async () => {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) Alert.alert('Login failed', error.message);
+        else navigation.replace('Home');
+    };
+
+    const handleSignup = async () => {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) Alert.alert('Login failed', error.message);
+      else navigation.replace('Home');
     };
 
     return (
@@ -14,6 +26,9 @@ export default function LoginScreen({ navigation }) {
                 style={styles.input}
                 placeholder="Email"
                 placeholderTextColor="#aaa"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
             />
 
             <TextInput
@@ -21,10 +36,16 @@ export default function LoginScreen({ navigation }) {
                 placeholder="Password"
                 placeholderTextColor="#aaa"
                 secureTextEntry
+                value={password}
+                onChangeText={setPassword}
             />
 
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Login!</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleSignup}>
+              <Text style={styles.link}>Create an account</Text>
             </TouchableOpacity>
         </View>
     );
