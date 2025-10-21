@@ -1,15 +1,64 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 export default function SearchScreen({ navigation }) {
+
+  const [formData, setFormData ] = useState({
+    courseName: '',
+    sectionHave: '',
+    sectionWant: '',
+  });
+
+  const handleChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+  };
+
+  const handleSubmit = () => {
+    Alert.alert(
+      'Form Submitted', 
+      'You entered:\n\ Course Name: $(formData.courseName}\n Section You Have: ${formData.sectionHave}\nSection You Want: ${formData.sectionWant}',
+        [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
+      );
+    setFormData({
+      courseName: '',
+      sectionHave: '',
+      sectionWant: '',
+    });
+  };
     return(
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
-                <Text style={styles.text}>This is the Search Screen!</Text>
+                <Text style={styles.text}>This is the Create Trade Request!</Text>
             </View>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Course Name"
+              value = {formData.courseName}
+              onChangeText={(text) => handleChange('courseName', text)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Section I have"
+              value = {formData.sectionHave}
+              onChangeText={(text) => handleChange('sectionHave', text)}
+            />  
+
+            <TextInput
+              style={styles.input}
+              placeholder="Section I want"
+              value = {formData.sectionWant}
+              onChangeText={(text) => handleChange('sectionWant', text)}
+            />
+
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Create Trade Request</Text>
+            </TouchableOpacity>
+
 
             <View style={styles.iconBar}>
                 <TouchableOpacity style={styles.iconLink} onPress={() => navigation.navigate('Home')} >
@@ -36,6 +85,37 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
+      justifyContent: 'center',
+      paddingHorizontal: 20,
+      paddingBottom: 100,
+    },
+
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+
+    input: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 10,
+      padding: 12,
+      marginBottom: 15,
+      fontSize: 16,
+    },
+
+    button: {
+      backgroundColor: '#4B7BE5',
+      padding: 15,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+
+    buttonText: {
+      color: '#fff',
+      fontSize: 18,
     },
   
     text: {
