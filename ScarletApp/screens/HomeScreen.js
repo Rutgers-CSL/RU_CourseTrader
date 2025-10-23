@@ -16,7 +16,7 @@ export default function HomeScreen({ navigation }) {
                     <FontAwesome name="home" size={28} color="333" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconLink} onPress={() => navigation.navigate('Search')}>
-                    <FontAwesome name="search" size={28} color="333" />
+                    <FontAwesome name="plus" size={28} color="333" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconLink} onPress={() => navigation.navigate('Notifications')}>
                     <FontAwesome name="bell" size={28} color="333" />
