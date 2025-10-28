@@ -3,6 +3,7 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert } from 'reac
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { supabase } from '../lib/supabaseClient';
 
 export default function SearchScreen({ navigation }) {
 
@@ -16,17 +17,42 @@ export default function SearchScreen({ navigation }) {
     setFormData({ ...formData, [key]: value });
   };
 
-  const handleSubmit = () => {
-    Alert.alert(
-      'Form Submitted', 
-      'You entered:\n\ Course Name: $(formData.courseName}\n Section You Have: ${formData.sectionHave}\nSection You Want: ${formData.sectionWant}',
-        [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
+  const handleSubmit = async () => {
+
+    if (!formData.courseName || !formData.sectionHave || !formData.sectionWant){
+      Alert.alert('Error', 'Please fill out all fields');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('requests')
+        .insert([
+          {
+            course_name: formData.courseName,
+            section_have: formData.sectionHave,
+            section_want: formData.sectionWant,
+          },
+        ]);
+      if (error) {
+        throw error;
+      }
+      Alert.alert(
+        'Success!',
+        `Trade request created for ${formData.courseName}.`,
+        [{ text: 'OK' }]
       );
-    setFormData({
-      courseName: '',
-      sectionHave: '',
-      sectionWant: '',
-    });
+    
+      setFormData({
+        courseName: '',
+        sectionHave: '',
+        sectionWant: '',
+      });
+    } catch (error) {
+      console.error('Insert error: ', error);
+      Alert.alert('Error', error.message);
+    }
+
   };
     return(
         <SafeAreaView style={styles.container}>
