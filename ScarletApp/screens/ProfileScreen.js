@@ -3,13 +3,27 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { supabase } from '../lib/supabaseClient';
+
 
 export default function ProfileSearch({ navigation }) {
+
+    const handleLogout = async () => {
+      await supabase.auth.signOut();
+      navigation.replace("Login");
+    }
+
     return(
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
-                <Text style={styles.text}>This is the Profile Screen!</Text>
+                <Text style={styles.text}>Switch Account:</Text>
+
+                <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+                  <Text style={styles.logoutText}>Logout</Text>
+                </TouchableOpacity>
             </View>
+
+
 
             <View style={styles.iconBar}>
                 <TouchableOpacity style={styles.iconLink} onPress={() => navigation.navigate('Home')} >
@@ -83,6 +97,26 @@ const styles = StyleSheet.create({
       alignItems: "center",
       marginBottom: 80,
       backgroundColor: '#e0f7fa',
+    },
+
+    logoutButton: {
+      marginTop: 20,
+      alignSelf: "center",
+      backgroundColor: "#ff4d4d",
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 10,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 3,
+      elevation: 3, // Android shadow
+    },
+    
+    logoutText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "600",
     },
   });
   

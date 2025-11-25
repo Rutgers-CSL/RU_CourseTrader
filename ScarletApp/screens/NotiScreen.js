@@ -11,9 +11,22 @@ export default function NotiScreen({ navigation }) {
 
   const fetchRequests = async () => {
     try {
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+  
+      if (userError) throw userError;
+      if (!user) {
+        console.warn("No user is logged in");
+        return;
+      }
+
       const { data, error } = await supabase
         .from('requests')
-        .select('*');
+        .select('*')
+        .eq("user_id", user.id);
       if (error) throw error;
 
       console.log('Fetched requests:', data); // check your data

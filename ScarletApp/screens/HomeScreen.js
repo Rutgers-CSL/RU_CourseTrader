@@ -1,15 +1,85 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { supabase } from '../lib/supabaseClient';
+
 
 export default function HomeScreen({ navigation }) {
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const fetchMatchingRequests = async () => {
+
+      try {
+        setLoading(true);
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const { data: myRequests } = await supabase
+          .from("requests")
+          .select("*")
+          .eq("user_id", user.id);
+        
+        if (!myRequests || myRequests.length === 0) {
+          setRequests([]);
+          setLoading(false);
+          return;
+        }
+
+        const { data: otherRequests } = await supabase
+          .from("requests")
+          .select("*")
+          .neq("user_id", user.id)
+
+        const results = [];
+
+        for (const mine of myRequests) {
+          for (const theirs of otherRequests) {
+
+            if (
+              mine.course_name === theirs.course_name &&
+              mine.section_have === theirs.section_want &&
+              mine.section_want === theirs.section_have
+            ) {
+              results.push(theirs);
+            }
+          }
+        }
+
+        setRequests(results);
+      } catch (err) {
+        console.error("Error matching: ", err.message);
+      } finally {
+        setLoading(false);
+      }
+
+    }
+    
+    useEffect(() => {
+      fetchMatchingRequests();
+    }, []);
+
     return(
         <SafeAreaView style={styles.container}>
-            <View style={styles.container}>
-                <Text style={styles.text}>This is the Home Screen!</Text>
-            </View>
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 20, fontWeight: "bold" }}>Matching Trades</Text>
+
+            {loading && <Text>Loading...</Text>}
+
+            {!loading && requests.length === 0 && (
+              <Text>No matching trade requests found.</Text>
+            )}
+
+            {!loading && requests.map((req) => (
+              <View key={req.id} style={{ marginTop: 10 }}>
+                <Text>{req.course_name}</Text>
+                <Text>They have: {req.section_have}</Text>
+                <Text>They want: {req.section_want}</Text>
+              </View>
+            ))}
+          </View>
+
 
             <View style={styles.iconBar}>
                 <TouchableOpacity style={styles.iconLink} onPress={() => navigation.navigate('Home')} >
