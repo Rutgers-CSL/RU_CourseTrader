@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -13,6 +13,14 @@ export default function ProfileSearch({ navigation }) {
       navigation.replace("Login");
     }
 
+    const handleDeleteAccount = () => {
+      Alert.alert(
+        "Delete account",
+        "Delete account isn’t implemented yet.",
+        [{ text: "OK" }]
+      );
+    };
+
     return(
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
@@ -21,9 +29,12 @@ export default function ProfileSearch({ navigation }) {
                 <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
                   <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
+              
+                <TouchableOpacity onPress={handleDeleteAccount} style={styles.logoutButton}>  
+                  <Text style={styles.logoutText}>Delete Account</Text>
+                </TouchableOpacity>
+                
             </View>
-
-
 
             <View style={styles.iconBar}>
                 <TouchableOpacity style={styles.iconLink} onPress={() => navigation.navigate('Home')} >
