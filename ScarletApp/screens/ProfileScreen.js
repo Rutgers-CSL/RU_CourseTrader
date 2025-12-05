@@ -15,11 +15,56 @@ export default function ProfileSearch({ navigation }) {
 
     const handleDeleteAccount = () => {
       Alert.alert(
-        "Delete account",
-        "Delete account isn’t implemented yet.",
-        [{ text: "OK" }]
+        "Delete account data?",
+        "This will delete all of your trade requests and sign you out. This cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                // 1) Get the currently logged-in user
+                const {
+                  data: { user },
+                  error: userError,
+                } = await supabase.auth.getUser();
+
+                if (userError) throw userError;
+                if (!user) {
+                  Alert.alert("Error", "No user is logged in.");
+                  return;
+                }
+
+                // 2) Delete all requests for this user
+                const { error: deleteRequestsError } = await supabase
+                  .from("requests")
+                  .delete()
+                  .eq("user_id", user.id);
+
+                if (deleteRequestsError) throw deleteRequestsError;
+
+                // 3) ***TO DO *** call a backend function to delete the auth user
+                // await supabase.functions.invoke("delete_user", {
+                //   body: { user_id: user.id },
+                // });
+
+                // 4) Sign out and go to Login
+                await supabase.auth.signOut();
+                navigation.replace("Login");
+              } catch (err) {
+                console.error("Delete account error:", err);
+                Alert.alert(
+                  "Error",
+                  err?.message || "Could not delete your account."
+                );
+              }
+            },
+          },
+        ]
       );
     };
+
 
     return(
         <SafeAreaView style={styles.container}>
@@ -31,7 +76,7 @@ export default function ProfileSearch({ navigation }) {
                 </TouchableOpacity>
               
                 <TouchableOpacity onPress={handleDeleteAccount} style={styles.logoutButton}>  
-                  <Text style={styles.logoutText}>Delete Account</Text>
+                  <Text style={styles.logoutText}>Delete Account Data</Text>
                 </TouchableOpacity>
                 
             </View>
