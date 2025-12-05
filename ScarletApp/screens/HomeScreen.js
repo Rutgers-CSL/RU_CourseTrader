@@ -72,12 +72,22 @@ export default function HomeScreen({ navigation }) {
             )}
 
             {!loading && requests.map((req) => (
-              <View key={req.id} style={{ marginTop: 10 }}>
-                <Text>{req.course_name}</Text>
-                <Text>They have: {req.section_have}</Text>
-                <Text>They want: {req.section_want}</Text>
+              <View key={req.id} style={styles.tradeCard}>
+                <Text style={styles.tradeCourse}>{req.course_name}</Text>
+
+                <View style={styles.tradeRow}>
+                  <Text style={styles.tradeLabel}>Providing: </Text>
+                  <Text style={styles.tradeValue}>{req.section_have}</Text>
+                </View>
+
+                <View style={styles.tradeRow}>
+                  <Text style={styles.tradeLabel}>Requesting: </Text>
+                  <Text style={styles.tradeValue}>{req.section_want}</Text>
+                </View>
+                
               </View>
-            ))}
+))}
+
           </View>
 
 
@@ -154,5 +164,50 @@ const styles = StyleSheet.create({
       marginBottom: 80,
       backgroundColor: '#e0f7fa',
     },
+
+    // BLOCK STYLING
+    tradeCard: {
+      marginTop: 12,
+      padding: 16,
+      borderRadius: 12,
+      backgroundColor: "#f7f7f7",
+      borderWidth: 1,
+      borderColor: "#ddd",
+      // subtle shadow for iOS
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      // elevation for Android
+      elevation: 2,
+    },
+    tradeCourse: {
+      fontSize: 18,
+      fontWeight: "700",
+      marginBottom: 8,
+    },
+    tradeRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 4,
+    },
+    tradeLabel: {
+      fontWeight: "600",
+    },
+    tradeValue: {
+      fontWeight: "400",
+    },
+    tradeButton: {
+      marginTop: 10,
+      paddingVertical: 8,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: "#333",
+      alignItems: "center",
+    },
+    tradeButtonText: {
+      fontWeight: "600",
+    },
+
   });
   
