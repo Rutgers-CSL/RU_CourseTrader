@@ -12,12 +12,6 @@ export default function LoginScreen({ navigation }) {
         else navigation.replace('Home');
     };
 
-    const handleSignup = async () => {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) Alert.alert('Login failed', error.message);
-      else navigation.replace('Login');
-    };
-
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Welcome</Text>
@@ -44,7 +38,7 @@ export default function LoginScreen({ navigation }) {
                 <Text style={styles.buttonText}>Login!</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleSignup}>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
               <Text style={styles.link}>Create an account</Text>
             </TouchableOpacity>
         </View>
@@ -88,4 +82,10 @@ const styles = StyleSheet.create({
       fontSize: 18,
       fontWeight: '600',
     },
+    link: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#04AA6D',
+    fontWeight: '600',
+  },
   });
