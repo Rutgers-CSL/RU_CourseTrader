@@ -17,6 +17,7 @@ export default function ProfileSearch({ navigation }) {
     const [isModalVisible, setIsModalVisible] = useState(false);
     
     // Form States
+    const [newSection, setNewSection] = useState('');
     const [newTitle, setNewTitle] = useState('');
     const [newDay, setNewDay] = useState('Monday');
     const [newCampus, setNewCampus] = useState('');
@@ -69,7 +70,7 @@ export default function ProfileSearch({ navigation }) {
 
     // 3. Actions
     const addCourse = async () => {
-        if (!newTitle || !newCampus) {
+        if (!newTitle || !newCampus || (!newSection)) {
             Alert.alert("Missing Info", "Please enter a title and campus.");
             return;
         }
@@ -79,6 +80,7 @@ export default function ProfileSearch({ navigation }) {
         const newCourse = {
             user_id: user.id,
             title: newTitle,
+            section: newSection,
             day: newDay,
             start_time: newStart,
             end_time: newEnd,
@@ -97,6 +99,7 @@ export default function ProfileSearch({ navigation }) {
             setCourses((prevCourses) => [...prevCourses, data[0]]);
             setNewTitle('');
             setNewCampus('');
+            setNewSection('');
             setIsModalVisible(false);          
         }
     };
@@ -150,6 +153,14 @@ export default function ProfileSearch({ navigation }) {
                             style={styles.input}
                             value={newTitle}
                             onChangeText={setNewTitle}
+                        />
+
+                        <TextInput 
+                            placeholder="Section #" 
+                            style={styles.input}
+                            value={newSection}
+                            onChangeText={setNewSection}
+                            keyboardType="default"
                         />
                         
                         <TextInput 
@@ -236,7 +247,7 @@ export default function ProfileSearch({ navigation }) {
                                         }
                                     ]}
                                 >
-                                    <Text style={styles.courseTitle}>{course.title}</Text>
+                                    <Text style={styles.courseTitle}>{course.title} ({course.section})</Text>
                                     <Text style={styles.courseCampus}>{course.campus}</Text>
                                 </TouchableOpacity>
                             ))}
