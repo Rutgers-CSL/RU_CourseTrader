@@ -19,10 +19,14 @@ export default function ProfileSearch({ navigation }) {
     // Form States
     const [newSection, setNewSection] = useState('');
     const [newTitle, setNewTitle] = useState('');
-    const [newDay, setNewDay] = useState('Monday');
     const [newCampus, setNewCampus] = useState('');
-    const [newStart, setNewStart] = useState('10:00');
-    const [newEnd, setNewEnd] = useState('11:20');
+
+    //allow for grouping of the sections
+
+    const [slots, setSlots] = useState([{ day: 'Monday', start: '10:00', end: '11:20'}]);
+
+
+
 
     useEffect(() => {
         fetchCourses();
@@ -44,6 +48,17 @@ export default function ProfileSearch({ navigation }) {
     };
  
     // 2. Helper Functions
+
+    const addSlotRow = () => {
+        setSlots([...slots, { day: 'Monday', start: '10:00', end: '11:20'}])
+    };
+
+    const updateSlot = (index, field, value) => {
+        const updatedSlots = [...slots];
+        updatedSlots[index][field] = value;
+        setSlots(updatedSlots);
+    };
+
     const getTopPosition = (timeStr) => {
         if (!timeStr || typeof timeStr !== 'string') {
             return 0;
@@ -77,46 +92,43 @@ export default function ProfileSearch({ navigation }) {
 
         const { data: { user } } = await supabase.auth.getUser();
 
-        const newCourse = {
+        const sectionGroupId = crypto.randomUUID();
+
+        const courseRows = slots.map(slot => ({
             user_id: user.id,
+            group_id: sectionGroupId,
             title: newTitle,
             section: newSection,
-            day: newDay,
-            start_time: newStart,
-            end_time: newEnd,
+            day: slot.day,
+            start_time: slot.start,
+            end_time: slot.end,
             campus: newCampus,
             color: getCampusColor(newCampus),
-        };
+        }));
 
         const { data, error } = await supabase
             .from('user_courses')
-            .insert([newCourse])
+            .insert(courseRows)
             .select();
 
         if (error) {
             Alert.alert("Error", error.message);
         } else if (data && data.length > 0) {
-            setCourses((prevCourses) => [...prevCourses, data[0]]);
-            setNewTitle('');
-            setNewCampus('');
-            setNewSection('');
-            setIsModalVisible(false);          
+            setCourses(prev => [...prev, ...data]);
+            setIsModalVisible(false);     
+            setSlots([{ day: 'Monday', start: '10:00', end: '11:20' }])     
         }
     };
 
-    const deleteCourse = (id) => {
-        Alert.alert("Delete Class", "Remove this class from your schedule?", [
-            { text: "Cancel", style: "cancel" },
-            { text: "Delete", style: "destructive", onPress: async () => {
-                const { error } = await supabase
-                    .from('user_courses')
-                    .delete()
-                    .eq('id', id);
-                if (!error){
-                    setCourses(courses.filter(c => c.id !== id));
-                }
-            }}
-        ]);
+    const deleteCourseGroup = async (groupId) => {
+
+        const { error } = await supabase
+            .from('user_courses')
+            .delete()
+            .eq('group_id', groupId);
+        if (!error){
+            setCourses(courses.filter(c => c.groupId !== groupId));
+        }
     };
 
     const handleLogout = async () => {
@@ -146,65 +158,90 @@ export default function ProfileSearch({ navigation }) {
             <Modal visible={isModalVisible} animationType="slide" transparent={true}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Add New Class</Text>
-                        
-                        <TextInput 
-                            placeholder="Course Title (e.g. CS111)" 
-                            style={styles.input}
-                            value={newTitle}
-                            onChangeText={setNewTitle}
-                        />
-
-                        <TextInput 
-                            placeholder="Section #" 
-                            style={styles.input}
-                            value={newSection}
-                            onChangeText={setNewSection}
-                            keyboardType="default"
-                        />
-                        
-                        <TextInput 
-                            placeholder="Campus (Busch, Livingston...)" 
-                            style={styles.input}
-                            value={newCampus}
-                            onChangeText={setNewCampus}
-                        />
-
-                        <View style={styles.timeInputRow}>
+                        <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%' }}>
+                            <Text style={styles.modalTitle}>Add New Class</Text>
+                            
                             <TextInput 
-                                placeholder="Start (10:00)" 
-                                style={[styles.input, { flex: 1, marginRight: 5 }]}
-                                value={newStart}
-                                onChangeText={setNewStart}
+                                placeholder="Course Title (e.g. CS111)" 
+                                style={styles.input}
+                                value={newTitle}
+                                onChangeText={setNewTitle}
                             />
-                            <TextInput 
-                                placeholder="End (11:20)" 
-                                style={[styles.input, { flex: 1 }]}
-                                value={newEnd}
-                                onChangeText={setNewEnd}
-                            />
-                        </View>
 
-                        <Text style={styles.label}>Select Day:</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayPicker}>
-                            {DAYS.map(day => (
-                                <TouchableOpacity 
-                                    key={day} 
-                                    onPress={() => setNewDay(day)}
-                                    style={[styles.dayOption, newDay === day && styles.dayOptionSelected]}
-                                >
-                                    <Text style={newDay === day ? styles.dayTextSelected : styles.dayText}>{day.substring(0,3)}</Text>
-                                </TouchableOpacity>
+                            <TextInput 
+                                placeholder="Section #" 
+                                style={styles.input}
+                                value={newSection}
+                                onChangeText={setNewSection}
+                                keyboardType="default"
+                            />
+                            
+                            <TextInput 
+                                placeholder="Campus (Busch, Livingston...)" 
+                                style={styles.input}
+                                value={newCampus}
+                                onChangeText={setNewCampus}
+                            />
+
+                            <View style={styles.divider} />
+
+                            {/* DYNAMIC SLOTS SECTION */}
+                            {slots.map((slot, index) => (
+                                <View key={index} style={styles.slotBox}>
+                                    <View style={styles.slotHeader}>
+                                        <Text style={styles.label}>Meeting #{index + 1}</Text>
+                                        {slots.length > 1 && (
+                                            <TouchableOpacity onPress={() => setSlots(slots.filter((_, i) => i !== index))}>
+                                                <FontAwesome name="trash" size={18} color="#ff4d4d" />
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
+
+                                    {/* Day Picker for Slot */}
+                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayPicker}>
+                                        {DAYS.map(day => (
+                                            <TouchableOpacity 
+                                                key={day} 
+                                                onPress={() => updateSlot(index, 'day', day)}
+                                                style={[styles.dayOption, slot.day === day && styles.dayOptionSelected]}
+                                            >
+                                                <Text style={slot.day === day ? styles.dayTextSelected : styles.dayText}>
+                                                    {day.substring(0,3)}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </ScrollView>
+
+                                    {/* Time Inputs for Slot */}
+                                    <View style={styles.timeInputRow}>
+                                        <TextInput 
+                                            placeholder="Start" 
+                                            style={[styles.input, { flex: 1, marginRight: 5 }]}
+                                            value={slot.start}
+                                            onChangeText={(val) => updateSlot(index, 'start', val)}
+                                        />
+                                        <TextInput 
+                                            placeholder="End" 
+                                            style={[styles.input, { flex: 1 }]}
+                                            value={slot.end}
+                                            onChangeText={(val) => updateSlot(index, 'end', val)}
+                                        />
+                                    </View>
+                                </View>
                             ))}
+
+                            <TouchableOpacity onPress={addSlotRow} style={styles.addSlotButton}>
+                                <Text style={styles.addSlotText}>+ Add Lecture or Recitation Time</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.saveButton} onPress={addCourse}>
+                                <Text style={styles.buttonText}>Save Section to Calendar</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => setIsModalVisible(false)} style={{ alignItems: 'center', marginVertical: 15 }}>
+                                <Text style={styles.cancelLink}>Cancel</Text>
+                            </TouchableOpacity>
                         </ScrollView>
-
-                        <TouchableOpacity style={styles.saveButton} onPress={addCourse}>
-                            <Text style={styles.buttonText}>Save to Calendar</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                            <Text style={styles.cancelLink}>Cancel</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
@@ -237,7 +274,8 @@ export default function ProfileSearch({ navigation }) {
                             {courses.filter(c => c.day === day).map(course => (
                                 <TouchableOpacity 
                                     key={course.id} 
-                                    onLongPress={() => deleteCourse(course.id)}
+                                    // Use group_id for deletion if available, otherwise fallback to id
+                                    onLongPress={() => deleteCourse(course.group_id || course.id)}
                                     style={[
                                         styles.courseBlock, 
                                         { 
@@ -272,8 +310,7 @@ export default function ProfileSearch({ navigation }) {
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
-    );
-}
+    )};
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
