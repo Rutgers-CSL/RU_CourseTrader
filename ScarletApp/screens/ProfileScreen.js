@@ -83,40 +83,66 @@ export default function ProfileSearch({ navigation }) {
         }
     };
 
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0;
+          const v = c === 'x' ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+      };
+
     // 3. Actions
     const addCourse = async () => {
-        if (!newTitle || !newCampus || (!newSection)) {
-            Alert.alert("Missing Info", "Please enter a title and campus.");
+        // 1. Basic validation check
+        if (!newTitle || !newCampus || !newSection) {
+            Alert.alert("Missing Info", "Please enter a title, section, and campus.");
             return;
         }
-
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const sectionGroupId = crypto.randomUUID();
-
-        const courseRows = slots.map(slot => ({
-            user_id: user.id,
-            group_id: sectionGroupId,
-            title: newTitle,
-            section: newSection,
-            day: slot.day,
-            start_time: slot.start,
-            end_time: slot.end,
-            campus: newCampus,
-            color: getCampusColor(newCampus),
-        }));
-
-        const { data, error } = await supabase
-            .from('user_courses')
-            .insert(courseRows)
-            .select();
-
-        if (error) {
-            Alert.alert("Error", error.message);
-        } else if (data && data.length > 0) {
-            setCourses(prev => [...prev, ...data]);
-            setIsModalVisible(false);     
-            setSlots([{ day: 'Monday', start: '10:00', end: '11:20' }])     
+    
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("User not found");
+    
+            // 2. Generate UUID (If this fails, the catch block will trigger)
+            const sectionGroupId = generateUUID();
+    
+            const courseRows = slots.map(slot => ({
+                user_id: user.id,
+                group_id: sectionGroupId,
+                title: newTitle,
+                section: newSection,
+                day: slot.day,
+                start_time: slot.start,
+                end_time: slot.end,
+                campus: newCampus,
+                color: getCampusColor(newCampus),
+            }));
+    
+            // 3. Insert into Supabase
+            const { data, error } = await supabase
+                .from('user_courses')
+                .insert(courseRows) // Ensure NO brackets around courseRows
+                .select();
+    
+            if (error) {
+                // THIS WILL TELL YOU WHY IT IS FAILING
+                console.error("Supabase Error:", error);
+                Alert.alert("Database Error", error.message);
+                return;
+            }
+    
+            if (data) {
+                setCourses(prev => [...prev, ...data]);
+                // 4. Reset everything
+                setIsModalVisible(false);     
+                setSlots([{ day: 'Monday', start: '10:00', end: '11:20' }]);
+                setNewTitle('');
+                setNewSection('');
+                setNewCampus('');
+            }
+        } catch (err) {
+            console.error("Local Error:", err);
+            Alert.alert("Error", "Check your console or UUID generation.");
         }
     };
 
@@ -197,7 +223,6 @@ export default function ProfileSearch({ navigation }) {
                                         )}
                                     </View>
 
-                                    {/* Day Picker for Slot */}
                                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayPicker}>
                                         {DAYS.map(day => (
                                             <TouchableOpacity 
@@ -212,7 +237,6 @@ export default function ProfileSearch({ navigation }) {
                                         ))}
                                     </ScrollView>
 
-                                    {/* Time Inputs for Slot */}
                                     <View style={styles.timeInputRow}>
                                         <TextInput 
                                             placeholder="Start" 
@@ -274,8 +298,8 @@ export default function ProfileSearch({ navigation }) {
                             {courses.filter(c => c.day === day).map(course => (
                                 <TouchableOpacity 
                                     key={course.id} 
-                                    // Use group_id for deletion if available, otherwise fallback to id
-                                    onLongPress={() => deleteCourse(course.group_id || course.id)}
+                                    // FIXED: Changed deleteCourse to deleteCourseGroup
+                                    onLongPress={() => deleteCourseGroup(course.group_id || course.id)}
                                     style={[
                                         styles.courseBlock, 
                                         { 
@@ -353,4 +377,10 @@ const styles = StyleSheet.create({
 
     iconBar: { flexDirection: "row", justifyContent: "space-around", backgroundColor: "#fff", paddingVertical: 12, position: "absolute", bottom: 15, left: 15, right: 15, borderRadius: 25, elevation: 10, shadowOpacity: 0.15 },
     iconLink: { padding: 8 },
+
+    divider: { height: 1, backgroundColor: '#eee', marginVertical: 20, width: '100%' },
+    slotBox: { width: '100%', backgroundColor: '#f9f9f9', padding: 10, borderRadius: 10, marginBottom: 15, borderWidth: 1, borderColor: '#eee' },
+    slotHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+    addSlotButton: { padding: 12, marginBottom: 20, borderStyle: 'dashed', borderWidth: 1, borderColor: '#04AA6D', borderRadius: 8, width: '100%', alignItems: 'center' },
+    addSlotText: { color: '#04AA6D', fontWeight: 'bold' },
 });
