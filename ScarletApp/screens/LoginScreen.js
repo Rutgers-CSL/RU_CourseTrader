@@ -11,7 +11,23 @@ export default function LoginScreen({ navigation }) {
         if (error) Alert.alert('Login failed', error.message);
         else navigation.replace('Home');
     };
+    const handlePasswordReset = async () => {
+        if (!email) {
+            Alert.alert('Enter your email', 'Please enter your email address first.');
+            return;
+        }
+        
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: 'courseswapper://reset-password' 
+        });
 
+        if (error) {
+            Alert.alert('Error', error.message);
+        } else {
+            Alert.alert('Check your email', 'We sent you a password reset link!');
+        }
+    };
+    
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Welcome</Text>
@@ -36,6 +52,10 @@ export default function LoginScreen({ navigation }) {
 
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Login!</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handlePasswordReset}>
+              <Text style={styles.link}>Forgot password?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
