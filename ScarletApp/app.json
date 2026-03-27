@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "MyBlankApp",
+    "scheme": "courseswapper",
     "slug": "MyBlankApp",
     "version": "1.0.0",
     "sdkVersion": "54.0.0",

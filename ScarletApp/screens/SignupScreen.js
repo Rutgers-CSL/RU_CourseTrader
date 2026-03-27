@@ -19,10 +19,16 @@ export default function SignupScreen({ navigation }) {
       Alert.alert("Error", "Passwords do not match.");
       return;
     }
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ 
+      email,
+      password, 
+      options: {
+        emailRedirectTo: 'courseswapper://login'
+      } 
+    });
     if (error) Alert.alert("Signup failed", error.message);
     else {
-      Alert.alert("Success", "Account created! You can now log in.");
+      Alert.alert("Success", "Account created! You can now log in.", "Check your email for a confirmation link!");
       navigation.replace("Login");
     }
   };
