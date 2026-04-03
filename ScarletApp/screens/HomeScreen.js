@@ -11,6 +11,7 @@ export default function HomeScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewCourses, setPreviewCourses] = useState([]);
+    const [previewKey, setPreviewKey] = useState(0);
     
 
     const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -84,37 +85,42 @@ export default function HomeScreen({ navigation }) {
 
     const handlePreviewTrade = async (tradeRequest) => {
       try {
-          // Clear previous preview first to force a UI reset
-          setPreviewCourses([]); 
-          
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          const { data: currentClasses } = await supabase
-              .from('user_courses')
-              .select('*')
-              .eq('user_id', user.id);
-  
-          const { data: newSectionBlocks } = await supabase
-              .from('user_courses')
-              .select('*')
-              .eq('title', tradeRequest.course_name)
-              .eq('section', tradeRequest.section_have);
-  
-          // Remove OLD course completely
-          const filteredCurrent = currentClasses.filter(c => 
-              c.title.toLowerCase().trim() !== tradeRequest.course_name.toLowerCase().trim()
-          );
-  
-          // Merge and set
-          const finalSchedule = [...filteredCurrent, ...newSectionBlocks];
-          
-          console.log("Final Preview Array IDs:", finalSchedule.map(c => c.id));
-          
-          setPreviewCourses(finalSchedule);
-          setPreviewVisible(true);
-          
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        // 1. Get YOUR current classes
+        const { data: myClasses } = await supabase
+            .from('user_courses')
+            .select('*')
+            .eq('user_id', user.id);
+    
+        // 2. Get the blocks for the section you WANT
+        // We use .filter() on 'section' to handle potential Type mismatches (string vs int)
+        const { data: incomingBlocks, error } = await supabase
+            .from('user_courses')
+            .select('*')
+            .ilike('title', tradeRequest.course_name.trim())
+            .eq('section', tradeRequest.section_want); // Try section_want or section_have based on your logic
+    
+        if (error) console.error("Query Error:", error);
+    
+        // 3. Drop ANY existing blocks of that course name
+        const courseToDrop = tradeRequest.course_name.toUpperCase().trim();
+        const filtered = myClasses.filter(c => c.title.toUpperCase().trim() !== courseToDrop);
+    
+        // 4. Combine
+        const finalSchedule = [...filtered, ...(incomingBlocks || [])];
+    
+        // DEBUG LOGS - WATCH THESE CAREFULLY
+        console.log("Searching for Section:", tradeRequest.section_want);
+        console.log("Blocks found in DB:", incomingBlocks?.length || 0);
+        console.log("NEW Preview Sections:", finalSchedule.map(c => `${c.title}-${c.section}`));
+    
+        setPreviewCourses(finalSchedule);
+        setPreviewKey(prev => prev + 1);
+        setPreviewVisible(true);
+        
       } catch (err) {
-          console.error("Preview error:", err);
+          console.error(err);
       }
     };
 
@@ -153,7 +159,7 @@ export default function HomeScreen({ navigation }) {
 
         {/* PREVIEW MODAL */}
         <Modal visible={previewVisible} animationType="slide">
-          <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+          <SafeAreaView key={previewKey} style={{flex: 1, backgroundColor: '#fff'}}>
             <View style={styles.previewHeader}>
                 <Text style={styles.modalTitle}>Schedule Preview</Text>
                 <TouchableOpacity onPress={() => setPreviewVisible(false)} style={{ padding: 10 }}>
