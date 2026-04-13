@@ -99,7 +99,7 @@ export default function HomeScreen({ navigation }) {
             .from('user_courses')
             .select('*')
             .ilike('title', tradeRequest.course_name.trim())
-            .eq('section', tradeRequest.section_want); // Try section_want or section_have based on your logic
+            .eq('section', tradeRequest.section_have); // Try section_want or section_have based on your logic
     
         if (error) console.error("Query Error:", error);
     
@@ -140,11 +140,11 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.tradeCourse}>{req.course_name}</Text>
               <View style={styles.tradeRow}>
                 <Text style={styles.tradeLabel}>Providing: </Text>
-                <Text style={styles.tradeValue}>{req.section_have}</Text>
+                <Text style={styles.tradeValue}>{req.section_want}</Text>
               </View>
               <View style={styles.tradeRow}>
                 <Text style={styles.tradeLabel}>Requesting: </Text>
-                <Text style={styles.tradeValue}>{req.section_want}</Text>
+                <Text style={styles.tradeValue}>{req.section_have}</Text>
               </View>
 
               <TouchableOpacity 
